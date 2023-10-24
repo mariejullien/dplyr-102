@@ -22,3 +22,71 @@ accounts <-vroom(here("data", "account.csv"))
 disp <-vroom(here("data", "disp.csv"))
 ```
 
+## Joining data tables 
+A collection of joining functions of the form `*_join`.
+
+### Inner join 
+```{r}
+da <- inner_join(accounts, disp)
+```
+Look at the column that at the same name & operate the join over column that have the same name 
+
+```{r}
+cda <- inner_join(clients, da)
+```
+
+```{r}
+cda <- inner_join(clients, da, by= join_by("client_id"), suffix=c("home", "bank"))
+```
+
+### Home district vs Bank district
+
+```{r}
+home_diff_bank <- cda |> filter (district_idhome!= district_idbank) |> nrow()
+```
+in the first join, all those people were excluded 
+
+We observe that `r home_diff_bank` client have a bank in another district as the one they live in.
+
+```{r}
+cda |> 
+  group_by(account_id)|> 
+  distinct(district_idhome) |> 
+  summarise(N=n()) |> 
+  filter(N>1)
+```
+distinct -> see all the different value of the district home inside a group 
+
+### Gender gap? 
+```{r}
+clients |>
+  ggplot(aes(x=gender)) + geom_bar() + coord_flip()
+```
+=> no gender imbalance in the data set 
+=> coord flix tourne le graph 
+
+```{r}
+cda |> 
+  count(gender, type)
+```
+=> no gender effect bc distribution roughly the same 
+
+```{r}
+cda |> 
+  count(gender, type) |>
+  group_by(gender) |>
+  mutate(freq=n/sum(n)) |>
+  select(-n) |> 
+  ungroup() |>
+  pivot_wider(values_from= freq, names_from = type)
+```
+```{r}
+cda |>
+  ggplot(aes(y=gender, fill=type)) + geom_bar(position = "fill")
+```
+
+```{r}
+chisq.test(cda|>pull(gender),
+           cda |> pull(type))
+```
+H0 is not rejected 
