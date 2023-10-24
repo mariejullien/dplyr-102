@@ -1,0 +1,24 @@
+---
+title: "financial data analysis"
+author: "Marie JULLIEN"
+format: html
+editor: visual
+---
+
+```{r}
+#| message: false
+library(here)
+library(vroom) # or readr
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+## Data Loading
+```{r}
+#| message: false
+clients <-vroom(here("data", "client.csv"))
+accounts <-vroom(here("data", "account.csv"))
+disp <-vroom(here("data", "disp.csv"))
+```
+
